@@ -1,6 +1,6 @@
 resource "digitalocean_droplet" "ims-ui" {
     
-    image = "centos-6-x64"
+    image = "centos-7-x64"
     name = "ims-ui"
     region = "fra1"
     size = "512mb"
