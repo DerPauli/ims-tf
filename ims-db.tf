@@ -1,9 +1,9 @@
 resource "digitalocean_droplet" "ims-db" {
     
-    image = "centos-7-x64"
+    image = "ubuntu-19-04-x64"
     name = "ims-db"
     region = "fra1"
-    size = "512mb"
+    size = "1gb"
     private_networking = true
     ssh_keys = [
       "${var.ssh_fingerprint}"
@@ -17,16 +17,18 @@ resource "digitalocean_droplet" "ims-db" {
       timeout = "2m"
   }
 
+  provisioner "local-exec" {
+    command = "sleep 30"
+    on_failure = "continue"
+  }
+  provisioner "file" {
+    source      = "scripts/setup-db.sh"
+    destination = "/root/setup-db.sh"
+  }
   provisioner "remote-exec" {
     inline = [
-      # install mysql
-      "sudo yum update",
-      "yum -y install wget",
-      "wget http://repo.mysql.com/mysql-community-release-el7-5.noarch.rpm",
-      "sudo rpm -ivh mysql-community-release-el7-5.noarch.rpm",
-      "yum -y update",
-      "sudo yum -y install mysql-server",
-      "sudo systemctl start mysqld"
+      "chmod +x /root/setup-db.sh",
+      "/root/setup-db.sh ${var.db_pass} ${var.gh_token} ${var.graf_pass}"
     ]
   }
 }

@@ -1,13 +1,15 @@
 resource "digitalocean_droplet" "ims-ui" {
     
-    image = "centos-7-x64"
+    image = "ubuntu-19-04-x64"
     name = "ims-ui"
     region = "fra1"
-    size = "512mb"
+    size = "2gb"
     private_networking = true
     ssh_keys = [
       "${var.ssh_fingerprint}"
     ]
+
+    depends_on = ["${digitalocean_droplet.ims-db}"]
 
   connection {
       host = "${digitalocean_droplet.ims-ui.ipv4_address}"
@@ -19,11 +21,28 @@ resource "digitalocean_droplet" "ims-ui" {
 
   provisioner "remote-exec" {
     inline = [
-      # install npm and dependecies for sofa / graphql
-      # TODO: maybe add swagger / openapi for documentation
-      "sudo yum install -y gcc-c++ make",
-      "curl -sL https://rpm.nodesource.com/setup_6.x | sudo -E bash -",
-      "yum -y install nodejs"
+      "sudo apt-get update",
+      "sudo apt-get install -y curl git",
+
+      "curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -",
+      "sudo apt-get install -y nodejs",
+
+      "git clone https://github.com/DerPauli/ims-ui.git",
+      "cd ims-ui/ims-frontend",
+
+
+      # disable google analytics promt
+      "export NG_CLI_ANALYTICS=ci",
+      "npm install",
+      "npm install -g pm2",
+      "npm install -g @angular/cli",
+
+      "sudo iptables -t nat -I PREROUTING -p tcp --dport 80 -j REDIRECT --to-ports 4200",
+      "sudo ufw allow 4200",
+
+      "ng build --prod",
+      "pm2 serve dist/ims-frontend/ 80 --name Frontend"
+
     ]
   }
 }

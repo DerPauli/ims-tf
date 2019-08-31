@@ -1,6 +1,6 @@
-resource "digitalocean_project" "IMS" {
+resource "digitalocean_project" "IncidentMS" {
 
-  name        = "IMS"
+  name        = "IncidentMS"
   description = "Incident Management System"
   environment = "Development"
   resources   = ["${digitalocean_droplet.ims-api.urn}", "${digitalocean_droplet.ims-db.urn}",
