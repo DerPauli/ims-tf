@@ -16,11 +16,6 @@ resource "digitalocean_droplet" "ims-db" {
       private_key = "${file(var.pvt_key)}"
       timeout = "2m"
   }
-
-  provisioner "local-exec" {
-    command = "sleep 30"
-    on_failure = "continue"
-  }
   provisioner "file" {
     source      = "scripts/setup-db.sh"
     destination = "/root/setup-db.sh"

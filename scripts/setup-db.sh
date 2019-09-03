@@ -18,7 +18,7 @@ root_fix="GRANT ALL ON *.* to root IDENTIFIED BY '${db_pass}';FLUSH PRIVILEGES;"
 mysql -u root -p${db_pass} -e "${root_fix}"
 
 # setup grafana exporter user
-graf_user="CREATE USER 'mysqld_exporter' IDENTIFIED BY '${graf_pass}';GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter';FLUSH PRIVILEGES;"
+graf_user="CREATE USER 'mysqld_exporter' IDENTIFIED BY '${graf_pass}' WITH MAX_USER_CONNECTIONS 5;GRANT PROCESS, REPLICATION CLIENT, SELECT ON *.* TO 'mysqld_exporter';FLUSH PRIVILEGES;"
 mysql -u root -p${db_pass} -e "${graf_user}"
 
 # get repo
@@ -39,6 +39,15 @@ sudo useradd node_exporter -s /sbin/nologin
 wget https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz
 tar xvf node_exporter-0.18.1.linux-amd64.tar.gz
 sudo cp node_exporter-0.18.1.linux-amd64/node_exporter /usr/local/bin
+
+# install mysqld_exporter
+sudo useradd mysqld_exporter
+wget https://github.com/prometheus/mysqld_exporter/releases/download/v0.12.1/mysqld_exporter-0.12.1.linux-amd64.tar.gz
+tar xvf mysqld_exporter-0.12.1.linux-amd64.tar.gz
+
+sudo mv  mysqld_exporter-0.12.1.linux-amd64/mysqld_exporter /usr/local/bin/
+sudo chmod +x /usr/local/bin/mysqld_exporter
+sudo chown root:prometheus /etc/.mysqld_exporter.cnf
 
 
 # care about grafana
@@ -79,8 +88,10 @@ systemctl restart mysql
 
 systemctl start prometheus
 systemctl start node_exporter
+systemctl start mysqld_exporter
 systemctl start grafana-server
 
 systemctl enable prometheus
 systemctl enable node_exporter
+systemctl enable mysqld_exporter
 systemctl enable grafana-server
