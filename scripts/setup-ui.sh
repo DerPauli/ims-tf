@@ -20,6 +20,7 @@ npm install
 
 npm run build
 npm install -g serve
+npm install -g pm2
 
 
-serve -s build -l 80 &
+pm2 start npm -- start
