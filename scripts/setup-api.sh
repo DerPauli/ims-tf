@@ -26,7 +26,7 @@ npx sequelize db:migrate
 npx sequelize db:seed:all
 
 # start api
-pm2 start src/pre.js --name Backend
+pm2 start src/pre.js --name api
 
 # note certbot has to be started manually
 sudo apt-get update
